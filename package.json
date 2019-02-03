@@ -1,0 +1,19 @@
+{
+ "name": "node-red-node-camunda-worker",
+ "version": "1.0.0",
+ "description": "",
+ "main": "node-red-node-camunda-worker.js",
+ "scripts": {
+  "test": "echo \"Error: no test specified\" && exit 1"
+ },
+ "author": "",
+ "license": "ISC",
+ "node-red": {
+  "nodes": {
+   "node-red-node-camunda-worker": "node-red-node-camunda-worker.js"
+  }
+ },
+ "dependencies": {
+  "camunda-worker-node": "^7.1.0"
+ }
+}
