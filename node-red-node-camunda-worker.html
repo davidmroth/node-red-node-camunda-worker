@@ -7,8 +7,8 @@
 	</div>
 
 	<div class="form-row">
-		<label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
-		<input id="node-input-url" type="text" placeholder="http://">
+		<label for="node-input-camunda_endpoint"><i class="fa fa-globe"></i> <span data-i18n="Camunda Endpoint"></span></label>
+		<input id="node-input-camunda_endpoint" type="text" placeholder="http://">
 	</div>
 
 	<div class="form-row">
@@ -40,11 +40,11 @@
 		category: 'input',
 		defaults: {
 			name: { value: '' },
-			url: { value: 'http://localhost:8080/engine-rest' },
+			camunda_endpoint: { value: 'http://localhost:8080/engine-rest' },
 			camunda_topic: { value:'' },
 			func: { value: '\nreturn msg;' },
 			outputs: { value: 1 },
-			noerr: { value: 0,required:true, validate:function(v) { return ( (!v) || (v === 0) ) ? true : false; } }
+			noerr: { value: 0, required: true, validate:function(v) { return ( (!v) || (v === 0) ) ? true : false; } }
 		},
 
 		inputs: 0,
@@ -52,7 +52,7 @@
 		icon: 'function.png',
 
 		label: function() {
-			return this.name || this._( 'camunda worker' );
+			return this.name || this._( ' Camunda Worker' );
 		},
 
 		labelStyle: function() {
@@ -93,11 +93,11 @@
 			} );
 
 			RED.library.create( {
-				url: 'camunda', // where to get the data from
+				camunda_endpoint: 'camunda', // where to get the data from
 				type: 'function', // the type of object the library is for
-				editor:this.editor, // the field name the main text body goes to
+				editor: this.editor, // the field name the main text body goes to
 				mode: 'ace/mode/nrjavascript',
-				fields:[ 'name', 'url', 'camunda_topic', 'outputs' ]
+				fields:[ 'name', 'camunda_endpoint', 'camunda_topic', 'outputs' ]
 			});
 
 			this.editor.focus();
@@ -114,7 +114,7 @@
 
 					complete: function( v, cursor ) {
 						that.editor.setValue( v, -1 );
-						that.editor.gotoLine( cursor.row+1,cursor.column, false );
+						that.editor.gotoLine( cursor.row + 1, cursor.column, false );
 						setTimeout( function() {
 							that.editor.focus();
 						}, 300 );
@@ -152,7 +152,7 @@
 			var rows = $( '#dialog-form>div:not(.node-text-editor-row)' );
 			var height = $( '#dialog-form' ).height();
 
-			for (var i=0; i<rows.size(); i++) {
+			for (var i=0; i < rows.size(); i++) {
 				height -= $( rows[i] ).outerHeight( true );
 			}
 

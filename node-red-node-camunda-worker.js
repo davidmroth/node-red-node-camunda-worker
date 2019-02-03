@@ -1,39 +1,37 @@
 module.exports = function( RED ) {
-	let Worker = require( 'camunda-worker-node' );
-	let Backoff = require( 'camunda-worker-node/lib/backoff' );
+	var Worker = require( 'camunda-worker-node' );
+	var Backoff = require( 'camunda-worker-node/lib/backoff' );
 
 	function CamundaWorker( config ) {
 		RED.nodes.createNode( this, config );
 
-		this.url = config.url;
+		this.camunda_endpoint = config.camunda_endpoint;
 		this.camunda_topic = config.camunda_topic;
 		this.func = config.func;
 
 		console.log( this.func );
-		console.log( this.url );
+		console.log( this.camunda_endpoint );
 		console.log( this.camunda_topic );
 
-		let engineEndpoint = config.camundaEndpoint;
-		let functionText = "var results = null;"+
-											"results = (function(msg){ "+
-												"var __msgid__ = msg._msgid;"+
-												"var node = {"+
-														"id:__node__.id,"+
-														"name:__node__.name,"+
-														"log:__node__.log,"+
-														"error:__node__.error,"+
-														"warn:__node__.warn,"+
-														"debug:__node__.debug,"+
-														"trace:__node__.trace,"+
-														"on:__node__.on,"+
-														"status:__node__.status,"+
-														"send:function(msgs){ __node__.send(__msgid__,msgs);}"+
-												"};\n"+
-												this.func+"\n"+
-											"})(msg);";
+		var functionText = "var results = null;"+
+			"results = (function(msg){ "+
+				"var __msgid__ = msg._msgid;"+
+				"var node = {"+
+					"id:__node__.id,"+
+					"name:__node__.name,"+
+					"log:__node__.log,"+
+					"error:__node__.error,"+
+					"warn:__node__.warn,"+
+					"debug:__node__.debug,"+
+					"trace:__node__.trace,"+
+					"on:__node__.on,"+
+					"status:__node__.status,"+
+					"send:function(msgs){ __node__.send(__msgid__,msgs);}"+
+				"};\n"+
+				this.func+"\n"+
+			"})(msg);";
 
-
-		this.worker = Worker( engineEndpoint, {
+		this.worker = Worker( this.camunda_endpoint, {
 			workerId: 'node-red-camunda',
 			use: [
 				Backoff
@@ -42,6 +40,8 @@ module.exports = function( RED ) {
 
 		// implement work via a Promise returning async function
 		this.worker.subscribe( this.camunda_topic, async function( context ) {
+
+			console.error( "******** CAMUNDA TEST **********" );
 
 			//// await async increment
 			//var newNumber = await increment(context.variables.numberVar);
@@ -58,7 +58,7 @@ module.exports = function( RED ) {
 		});
 
 
-		let node = this;
+		var node = this;
 
 		this.outstandingTimers = [];
 		this.outstandingIntervals = [];
@@ -206,7 +206,7 @@ module.exports = function( RED ) {
 			};
 		}
 
-		let context = vm.createContext( sandbox );
+		var context = vm.createContext( sandbox );
 
 		try {
 			this.script = vm.createScript( functionText, {
