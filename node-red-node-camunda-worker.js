@@ -9,6 +9,10 @@ module.exports = function( RED ) {
 		this.camunda_topic = config.camunda_topic;
 		this.func = config.func;
 
+		console.log( this.func );
+		console.log( this.url );
+		console.log( this.camunda_topic );
+
 		let engineEndpoint = config.camundaEndpoint;
 		let functionText = "var results = null;"+
 											"results = (function(msg){ "+
@@ -37,7 +41,7 @@ module.exports = function( RED ) {
 		});
 
 		// implement work via a Promise returning async function
-		this.worker.subscribe( this.camunda_tpic, async function( context ) {
+		this.worker.subscribe( this.camunda_topic, async function( context ) {
 
 			//// await async increment
 			//var newNumber = await increment(context.variables.numberVar);
@@ -56,7 +60,6 @@ module.exports = function( RED ) {
 
 		let node = this;
 
-		this.topic = config.topic;
 		this.outstandingTimers = [];
 		this.outstandingIntervals = [];
 
@@ -290,5 +293,5 @@ module.exports = function( RED ) {
 	}
 
 	RED.nodes.registerType( 'camunda', CamundaWorker );
-	RED.library.register( 'functions' );
+	RED.library.register( 'camunda' );
 }
