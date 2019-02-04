@@ -39,6 +39,7 @@ module.exports = function( RED ) {
 							if ( type === 'object' ) {
 									type = Buffer.isBuffer( msg ) ? 'Buffer': ( util.isArray( msg ) ? 'Array':'Date' );
 							}
+
 							node.error( RED._( 'function.error.non-message-returned', { type: type } ) );
 						}
 					}
@@ -66,6 +67,23 @@ module.exports = function( RED ) {
 			]
 		});
 
+		var functionText = "var results = null;" +
+			"results = ( function( msg ) { " +
+				"var __msgid__ = msg._msgid;" +
+				"var node = {" +
+					"id: __node__.id," +
+					"name: __node__.name," +
+					"log: __node__.log," +
+					"error: __node__.error," +
+					"warn: __node__.warn," +
+					"debug: __node__.debug," +
+					"trace: __node__.trace," +
+					"on: __node__.on," +
+					"status: __node__.status," +
+					"send: function( msgs ) { __node__.send( __msgid__, msgs ); }" +
+				"};\n" +
+				this.func + "\n" +
+			"} )( msg );";
 
 		var node = this;
 
@@ -262,31 +280,14 @@ module.exports = function( RED ) {
 
 
 			//TODO: Finish this
-			node.emit( 'input', context );
+			node.emit( 'input', { payload: context } );
 		});
 
-		this.on( 'input', function( msg ) {
+		this.on( 'input', ( msg ) => {
 
 			try {
 
 				var context = vm.createContext( sandbox );
-				var functionText = "var results = null;" +
-					"results = ( function( msg ) { " +
-						"var __msgid__ = msg._msgid;" +
-						"var node = {" +
-							"id: __node__.id," +
-							"name: __node__.name," +
-							"log: __node__.log," +
-							"error: __node__.error," +
-							"warn: __node__.warn," +
-							"debug: __node__.debug," +
-							"trace: __node__.trace," +
-							"on: __node__.on," +
-							"status: __node__.status," +
-							"send: function( msgs ) { __node__.send( __msgid__,msgs ); }" +
-						"};\n" +
-						this.func + "\n" +
-					"} )( msg );";
 
 				this.script = vm.createScript( functionText, {
 					filename: 'Function node:' + this.id + ( this.name?' [' + this.name + ']': '' ), // filename for stack traces
@@ -296,8 +297,6 @@ module.exports = function( RED ) {
 					// lineOffset: -11, // line number offset to be used for stack traces
 					// columnOffset: 0, // column number offset to be used for stack traces
 				});
-
-				console.log( "3) *************" + this.func );
 
 				try {
 					var start = process.hrtime();
@@ -341,7 +340,7 @@ module.exports = function( RED ) {
 							if ( m ) {
 								var lineno = Number( m[1] )-1;
 								var cha = m[2];
-								errorMessage += " (line "+lineno+", col "+cha+")";
+								errorMessage += " (line " + lineno + ", col " + cha + ")";
 							}
 						}
 					}
@@ -362,8 +361,6 @@ module.exports = function( RED ) {
 		});
 
 		this.on( 'close', function() {
-			console.log( '******* CLOSING ******** ');
-
 			while ( node.outstandingTimers.length > 0 ) {
 				clearTimeout(node.outstandingTimers.pop() );
 			}
